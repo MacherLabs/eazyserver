@@ -100,14 +100,14 @@ class KafkaConnector(object):
 			self.consumer.subscribe([consumer_topic])
 
 			polling = True
-			print("Setting Consumer Offset...")
+			print("Setting Consumer 1 Offset...")
 
 			while(polling):
                         	print("Waiting for 5 seconds...")
                         	time.sleep(5)
 				try:
-					self.consumer.poll()
-					polling = False
+					_poll = self.consumer.poll()
+					if _poll is not None: polling = False
 				except:
 					print("Polling failed, trying again...")
 
@@ -120,11 +120,25 @@ class KafkaConnector(object):
 			self.consumer = None
 
 		if(consumer_topic2):
-                        self.consumer2 =  KafkaConsumer({ 'bootstrap.servers': 'kafka', 'auto.offset.reset': 'earliest' })
-                        self.consumer.subscribe([consumer_topic2])			
-			#self.consumer.poll()
-			#self.consumer2 = KafkaConsumer(consumer_topic2, bootstrap_servers=kafka_broker, auto_offset_reset=auto_offset_reset)
-			#self.consumer2.poll()
+                        self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': 'mygroup2', 'auto.offset.reset': 'smallest' })
+                        self.consumer2.subscribe([consumer_topic2])			
+			
+                        polling = True
+                        print("Setting Consumer 2 Offset...")
+			
+                        while(polling):
+                                print("Waiting for 5 seconds...")
+                                time.sleep(5)
+                                try:   
+                                        _poll = self.consumer2.poll(5.0)
+					if _poll is not None : polling = False
+                                except:
+                                        print("Polling failed, trying again...")
+
+                        # Seek to beginning
+                        partition2 = TopicPartition(consumer_topic2, partition=0, offset=0)
+                        self.consumer2.seek(partition2)
+
 		else:
 			self.consumer2 = None
 
@@ -135,7 +149,7 @@ class KafkaConnector(object):
 		while True:
 			if(self.consumer): # Check at least primary consumer is present
 				logger.info("Consumed | {} | Topic : {}".format(self.behavior.__class__.__name__, self.consumer_topic))
-				kafka_msg = (self.consumer.consume(1)[0])
+				kafka_msg = self.consumer.consume(1)[0]
 				msg = kafka_to_dict(kafka_msg)
 			else:
 				msg = None
@@ -143,7 +157,7 @@ class KafkaConnector(object):
 			if(self.consumer2): # check for two consumers		
 				try:
 					if(self.sync_consumer):
-						kafka_msg = next(self.consumer2)
+						kafka_msg = self.consumer2.consume(1)[0]
 						msg2 = kafka_to_dict(kafka_msg)
 						assert msg2["_id"] == msg["source_id"]
 					else:
