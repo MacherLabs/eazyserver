@@ -96,21 +96,26 @@ class KafkaConnector(object):
 			self.producer = None
 		
 		if(consumer_topic):
-			self.consumer =  KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': 'mygroup', 'auto.offset.reset': 'smallest' })
+			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': 'mygroup', 'auto.offset.reset': 'smallest' })
 			self.consumer.subscribe([consumer_topic])
-			self.consumer.poll(1.0)
 
+			polling = True
+			print("Setting Consumer Offset...")
 
-			print("Waiting for 3 seconds...")
-			time.sleep(3)
+			while(polling):
+                        	print("Waiting for 5 seconds...")
+                        	time.sleep(5)
+				try:
+					self.consumer.poll()
+					polling = False
+				except:
+					print("Polling failed, trying again...")
 
 
 			# Seek to beginning
-#			partition = TopicPartition(consumer_topic, partition=0, offset=0)
-#			self.consumer.seek(partition)
+			partition = TopicPartition(consumer_topic, partition=0, offset=0)
+			self.consumer.seek(partition)
 
-			#self.consumer = KafkaConsumer(consumer_topic, bootstrap_servers=kafka_broker, auto_offset_reset=auto_offset_reset)
-			#self.consumer.poll()
 		else:
 			self.consumer = None
 
