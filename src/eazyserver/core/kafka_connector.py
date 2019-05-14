@@ -25,7 +25,7 @@ def binary_to_dict(the_binary):
 
 def kafka_to_dict(kafka_msg):
 	msg = json.loads(binary_to_dict(kafka_msg.value()))
-	kafka_msg_id = "{id}:{topic}:{partition}:{offset}".format(**{ "id":msg["_id"],"offset":kafka_msg.offset, "partition": kafka_msg.partition, "topic":kafka_msg.topic })
+	kafka_msg_id = "{id}:{topic}:{partition}:{offset}".format(**{ "id":msg["_id"],"offset":kafka_msg.offset(), "partition": kafka_msg.partition(), "topic":kafka_msg.topic() })
 	msg["_kafka__id"]= kafka_msg_id
 	return msg
 	
@@ -156,6 +156,7 @@ class KafkaConnector(object):
 
 			if(self.consumer2): # check for two consumers		
 				try:
+					
 					if(self.sync_consumer):
 						kafka_msg = self.consumer2.consume(1)[0]
 						msg2 = kafka_to_dict(kafka_msg)
@@ -174,12 +175,12 @@ class KafkaConnector(object):
 					topicName = kafka_source_id.split(":")[-3] 			# 3rd last 
 					partitionName = int(kafka_source_id.split(":")[-2]) # 3rd last
 					offset =  int(kafka_source_id.split(":")[-1])
-					partition = TopicPartition(topic=topicName, partition=partitionName) 
+					partition = TopicPartition(topic=topicName, partition=partitionName, offset=offset) 
 
 					logger.debug("Partition : " + str(partition))
 
 					self.consumer2.seek(partition,offset)
-					msg2 = kafka_to_dict(next(self.consumer2))
+					msg2 = kafka_to_dict(self.consumer2.consume(1)[0])
 
 				output = self.behavior.run(msg, msg2)
 			elif(self.consumer): # One consumer only
