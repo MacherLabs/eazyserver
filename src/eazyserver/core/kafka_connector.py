@@ -96,7 +96,7 @@ class KafkaConnector(object):
 			self.producer = None
 		
 		if(consumer_topic):
-			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': 'mygroup', 'auto.offset.reset': 'smallest' })
+			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic) , 'auto.offset.reset': 'smallest' })
 			self.consumer.subscribe([consumer_topic])
 
 			polling = True
@@ -120,7 +120,7 @@ class KafkaConnector(object):
 			self.consumer = None
 
 		if(consumer_topic2):
-                        self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': 'mygroup2', 'auto.offset.reset': 'smallest' })
+                        self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': 'smallest' })
                         self.consumer2.subscribe([consumer_topic2])			
 			
                         polling = True
