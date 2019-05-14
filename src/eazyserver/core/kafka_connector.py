@@ -199,3 +199,4 @@ class KafkaConnector(object):
 				if(output):
 					value = dict_to_kafka(output,source_data)
 					self.producer.produce(self.producer_topic, value)
+					self.producer.poll(0)
