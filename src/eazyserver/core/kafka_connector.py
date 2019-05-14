@@ -179,7 +179,7 @@ class KafkaConnector(object):
 
 					logger.debug("Partition : " + str(partition))
 
-					self.consumer2.seek(partition,offset)
+					self.consumer2.seek(partition)
 					msg2 = kafka_to_dict(self.consumer2.consume(1)[0])
 
 				output = self.behavior.run(msg, msg2)
