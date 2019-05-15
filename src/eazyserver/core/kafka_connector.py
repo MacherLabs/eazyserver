@@ -94,47 +94,14 @@ class KafkaConnector(object):
 		if(consumer_topic):
 			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic) , 'auto.offset.reset': auto_offset_reset }) # Check str(Behaviour) 
 			self.consumer.subscribe([consumer_topic])
-
-			polling = True
-			print("Setting Consumer 1 Offset...")
-
-			while(polling):
-                        	print("Waiting for 5 seconds...")
-                        	time.sleep(5)
-				try:
-					_poll = self.consumer.poll()
-					if _poll is not None: polling = False
-				except:
-					print("Polling failed, trying again...")
-
-
-			# Seek to beginning
-			partition = TopicPartition(consumer_topic, partition=0, offset=0)
-			self.consumer.seek(partition)
-
+			self.consumer.poll()
 		else:
 			self.consumer = None
 
 		if(consumer_topic2):
                         self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': auto_offset_reset })
                         self.consumer2.subscribe([consumer_topic2])			
-			
-                        polling = True
-                        print("Setting Consumer 2 Offset...")
-			
-                        while(polling):
-                                print("Waiting for 5 seconds...")
-                                time.sleep(5)
-                                try:   
-                                        _poll = self.consumer2.poll(5.0)
-					if _poll is not None : polling = False
-                                except:
-                                        print("Polling failed, trying again...")
-
-                        # Seek to beginning
-                        partition2 = TopicPartition(consumer_topic2, partition=0, offset=0)
-                        self.consumer2.seek(partition2)
-
+                        self.consumer2.poll()
 		else:
 			self.consumer2 = None
 
