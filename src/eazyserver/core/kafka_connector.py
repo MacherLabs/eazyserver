@@ -165,7 +165,7 @@ class KafkaConnector(object):
 						msg2_raw = self.consumer2.poll()
 
 						if msg2_raw:
-							msg2 = kafka_to_dict(msg2_raw.values()[0][0])							
+							msg2 = kafka_to_dict(msg2_raw)							
 						else:
 							msg2 = None
 				except AssertionError:
