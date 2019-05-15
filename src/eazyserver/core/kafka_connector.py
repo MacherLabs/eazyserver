@@ -7,10 +7,6 @@ import time
 from bson.objectid import ObjectId
 from datetime import datetime
 
-#from kafka import KafkaProducer
-#from kafka import KafkaConsumer
-#from kafka import TopicPartition
-
 from confluent_kafka import Producer as KafkaProducer
 from confluent_kafka import Consumer as KafkaConsumer
 from confluent_kafka import TopicPartition
@@ -96,7 +92,7 @@ class KafkaConnector(object):
 			self.producer = None
 		
 		if(consumer_topic):
-			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic) , 'auto.offset.reset': 'smallest' })
+			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic) , 'auto.offset.reset': auto_offset_reset }) # Check str(Behaviour) 
 			self.consumer.subscribe([consumer_topic])
 
 			polling = True
@@ -120,7 +116,7 @@ class KafkaConnector(object):
 			self.consumer = None
 
 		if(consumer_topic2):
-                        self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': 'smallest' })
+                        self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': auto_offset_reset })
                         self.consumer2.subscribe([consumer_topic2])			
 			
                         polling = True
@@ -149,7 +145,7 @@ class KafkaConnector(object):
 		while True:
 			if(self.consumer): # Check at least primary consumer is present
 				logger.info("Consumed | {} | Topic : {}".format(self.behavior.__class__.__name__, self.consumer_topic))
-				kafka_msg = self.consumer.consume(1)[0]
+				kafka_msg = self.consumer.consume(num_messages=1)[0]
 				msg = kafka_to_dict(kafka_msg)
 			else:
 				msg = None
@@ -158,7 +154,7 @@ class KafkaConnector(object):
 				try:
 					
 					if(self.sync_consumer):
-						kafka_msg = self.consumer2.consume(1)[0]
+						kafka_msg = self.consumer2.consume(num_messages=1)[0]
 						msg2 = kafka_to_dict(kafka_msg)
 						assert msg2["_id"] == msg["source_id"]
 					else:
@@ -180,7 +176,7 @@ class KafkaConnector(object):
 					logger.debug("Partition : " + str(partition))
 
 					self.consumer2.seek(partition)
-					msg2 = kafka_to_dict(self.consumer2.consume(1)[0])
+					msg2 = kafka_to_dict(self.consumer2.consume(num_messages=1)[0])
 
 				output = self.behavior.run(msg, msg2)
 			elif(self.consumer): # One consumer only
