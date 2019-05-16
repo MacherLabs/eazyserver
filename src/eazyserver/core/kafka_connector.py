@@ -3,13 +3,13 @@ logger = logging.getLogger(__name__)
 logger.debug("Loaded " + __name__)
 
 import json
+import time
 from bson.objectid import ObjectId
 from datetime import datetime
 
-from kafka import KafkaProducer
-from kafka import KafkaConsumer
-from kafka import TopicPartition
-
+from confluent_kafka import Producer as KafkaProducer
+from confluent_kafka import Consumer as KafkaConsumer
+from confluent_kafka import TopicPartition
 
 def dict_to_binary(the_dict):
 	binary = ' '.join(format(ord(letter), 'b') for letter in the_dict)
@@ -20,8 +20,8 @@ def binary_to_dict(the_binary):
 	return jsn
 
 def kafka_to_dict(kafka_msg):
-	msg = json.loads(binary_to_dict(kafka_msg.value))
-	kafka_msg_id = "{id}:{topic}:{partition}:{offset}".format(**{ "id":msg["_id"],"offset":kafka_msg.offset, "partition": kafka_msg.partition, "topic":kafka_msg.topic })
+	msg = json.loads(binary_to_dict(kafka_msg.value()))
+	kafka_msg_id = "{id}:{topic}:{partition}:{offset}".format(**{ "id":msg["_id"],"offset":kafka_msg.offset(), "partition": kafka_msg.partition(), "topic":kafka_msg.topic() })
 	msg["_kafka__id"]= kafka_msg_id
 	return msg
 	
@@ -87,45 +87,45 @@ class KafkaConnector(object):
 		logger.info("=" * 20)
 
 		if(producer_topic):
-			self.producer = KafkaProducer(bootstrap_servers=kafka_broker, max_request_size=20000000)
+			self.producer = KafkaProducer({'bootstrap.servers': kafka_broker, 'message.max.bytes' : 20000000})
 		else:
 			self.producer = None
 		
 		if(consumer_topic):
-			self.consumer = KafkaConsumer(consumer_topic, bootstrap_servers=kafka_broker, auto_offset_reset=auto_offset_reset)
+			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic) , 'auto.offset.reset': auto_offset_reset }) # Check str(Behaviour) 
+			self.consumer.subscribe([consumer_topic])
 			self.consumer.poll()
 		else:
 			self.consumer = None
 
 		if(consumer_topic2):
-			self.consumer2 = KafkaConsumer(consumer_topic2, bootstrap_servers=kafka_broker, auto_offset_reset=auto_offset_reset)
-			self.consumer2.poll()
+            self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': auto_offset_reset })
+            self.consumer2.subscribe([consumer_topic2])			
+            self.consumer2.poll()
 		else:
 			self.consumer2 = None
-
-		
-
 
 	def run(self):
 		while True:
 			if(self.consumer): # Check at least primary consumer is present
 				logger.info("Consumed | {} | Topic : {}".format(self.behavior.__class__.__name__, self.consumer_topic))
-				kafka_msg = next(self.consumer)
+				kafka_msg = self.consumer.consume(num_messages=1)[0]
 				msg = kafka_to_dict(kafka_msg)
 			else:
 				msg = None
 
 			if(self.consumer2): # check for two consumers		
 				try:
+					
 					if(self.sync_consumer):
-						kafka_msg = next(self.consumer2)
+						kafka_msg = self.consumer2.consume(num_messages=1)[0]
 						msg2 = kafka_to_dict(kafka_msg)
 						assert msg2["_id"] == msg["source_id"]
 					else:
-						msg2_raw = self.consumer2.poll(max_records=1)
+						msg2_raw = self.consumer2.poll()
 
 						if msg2_raw:
-							msg2 = kafka_to_dict(msg2_raw.values()[0][0])							
+							msg2 = kafka_to_dict(msg2_raw)							
 						else:
 							msg2 = None
 				except AssertionError:
@@ -135,12 +135,12 @@ class KafkaConnector(object):
 					topicName = kafka_source_id.split(":")[-3] 			# 3rd last 
 					partitionName = int(kafka_source_id.split(":")[-2]) # 3rd last
 					offset =  int(kafka_source_id.split(":")[-1])
-					partition = TopicPartition(topic=topicName, partition=partitionName) 
+					partition = TopicPartition(topic=topicName, partition=partitionName, offset=offset) 
 
 					logger.debug("Partition : " + str(partition))
 
-					self.consumer2.seek(partition,offset)
-					msg2 = kafka_to_dict(next(self.consumer2))
+					self.consumer2.seek(partition)
+					msg2 = kafka_to_dict(self.consumer2.consume(num_messages=1)[0])
 
 				output = self.behavior.run(msg, msg2)
 			elif(self.consumer): # One consumer only
@@ -155,7 +155,9 @@ class KafkaConnector(object):
 				if self.consumer2: source_data.append(msg2)
 				output=formatOutput(output,self.behavior,source_data)
 
-			if(self.producer):
+			if(self.producer_topic is not None):
 				logger.info("Produced | {} | Topic : {}".format(self.behavior.__class__.__name__, self.producer_topic))
 				if(output):
-					self.producer.send(topic=self.producer_topic, value=dict_to_kafka(output,source_data))
+					value = dict_to_kafka(output,source_data)
+					self.producer.produce(self.producer_topic, value)
+					self.producer.poll(0)
