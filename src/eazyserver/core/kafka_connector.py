@@ -99,9 +99,9 @@ class KafkaConnector(object):
 			self.consumer = None
 
 		if(consumer_topic2):
-            self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': auto_offset_reset })
-            self.consumer2.subscribe([consumer_topic2])			
-            self.consumer2.poll()
+			self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': auto_offset_reset })
+			self.consumer2.subscribe([consumer_topic2])			
+			self.consumer2.poll()
 		else:
 			self.consumer2 = None
 
