@@ -31,8 +31,8 @@ setup_requirements = [ ]
 test_requirements = [ ]
 
 setup(
-    author="Ashutosh Mishra",
-    author_email='ashutoshdtu@gmail.com',
+    author="Raunaq",
+    author_email='raunaq@vedalabs.in',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -64,7 +64,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/ashutoshdtu/eazyserver',
+    url='https://github.com/MacherLabs/eazyserver',
     version=version,
     zip_safe=False,
 )
