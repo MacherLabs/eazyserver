@@ -17,6 +17,7 @@ def opencv_frame_to_dict(frame):
 	res = {}
 	res['image'] = b64encode(encoded_frame)
 	res['_type'] = "b64encoded frame"
+	res['_id'] = "1"
 
 	return(res)
 
@@ -77,11 +78,10 @@ class LocalConnector(object):
 
 	'''
 
-	def __init__(self, **kwargs):
+	def __init__(self, Behaviour, **kwargs):
 	
 		super(LocalConnector, self).__init__()
 
-		self.Behaviour = kwargs.get('Behaviour', None)
 		self.input_source = kwargs.get('input_source', None) 
 		self.output_source = kwargs.get('output_source', None)
 
@@ -92,7 +92,7 @@ class LocalConnector(object):
 		self.writer = None
 
 		# Create an Instance of Behaviour
-		self.beh = self.Behaviour()
+		self.beh = Behaviour
 
 		# Create the reader object
 		self.reader = CV(video_source=self.input_source)
