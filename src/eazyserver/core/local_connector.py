@@ -57,6 +57,7 @@ class JSON(object):
 				outfile.write(',')
 				json.dump(data, outfile)
 				outfile.write(']')
+				logger.info("Results written to {} successfully".format(self.json_output_file))
 		else: 
 			# Create file
 			with open(self.json_output_file, 'w') as outfile:
