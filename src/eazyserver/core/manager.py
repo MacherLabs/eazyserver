@@ -15,14 +15,42 @@ class Manager(object):
 		self.behaviour = Behaviour
 
 	def run(self):
+		logger.info("Manager run() called.")
 		self.behaviour.run()
 
 	def onStart(self):
-		print("Method called before running Behaviour")
+		logger.info("Manager onStart() called.")
 
 	def onExit(self):
-		print("Method called when on exiting the Behaviour")
+		logger.info("Manager onExit() called.")
+
+	# Handling Signals
+
+	def receiveSignal(self, signalNumber, frame):  
+	    print('Received:', signalNumber)
+
+	    # SIGUSR1
+	    if(signalNumber == 10):
+	    	logger.info("Signal - SIGUSR1")
+
+	    # SIGUSR2
+	    if(signalNumber == 12):
+	    	logger.info("Signal - SIGUSR2")
+
+	    # SIGTERM
+	    if(signalNumber == 15):
+	    	logger.info("Terminating...")
+	    	self.onExit()
+	    
 
 	def onSignal(self):
-		print("Handling Signal")
+		logger.info("Manager Signal Handler Initialized.")
+		logger.info('My PID is:', os.getpid())
+
+		signal.signal(signal.SIGUSR1, self.receiveSignal)
+		signal.signal(signal.SIGUSR2, self.receiveSignal)
+		signal.signal(signal.SIGTERM, self.receiveSignal)
+
+
+
 
