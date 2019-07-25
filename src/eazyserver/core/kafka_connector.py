@@ -92,14 +92,14 @@ class KafkaConnector(object):
 			self.producer = None
 		
 		if(consumer_topic):
-			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic) , 'auto.offset.reset': auto_offset_reset, 'max.poll.interval.ms': 3600000}) # Check str(Behaviour) 
+			self.consumer = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic) , 'auto.offset.reset': auto_offset_reset, 'max.poll.interval.ms': 86400000 }) # Check str(Behaviour) 
 			self.consumer.subscribe([consumer_topic])
 			self.consumer.poll()
 		else:
 			self.consumer = None
 
 		if(consumer_topic2):
-			self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': auto_offset_reset, 'max.poll.interval.ms': 3600000 })
+			self.consumer2 = KafkaConsumer({ 'bootstrap.servers': 'kafka', 'group.id': str(Behaviour) + str(consumer_topic2) , 'auto.offset.reset': auto_offset_reset, 'max.poll.interval.ms': 86400000 })
 			self.consumer2.subscribe([consumer_topic2])			
 			self.consumer2.poll()
 		else:
