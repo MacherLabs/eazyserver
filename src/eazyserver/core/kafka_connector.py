@@ -122,7 +122,7 @@ class KafkaConnector(object):
 						msg2 = kafka_to_dict(kafka_msg)
 						assert msg2["_id"] == msg["source_id"]
 					else:
-						msg2_raw = self.consumer2.poll()
+						msg2_raw = self.consumer2.poll(timeout=0.01)
 
 						if msg2_raw:
 							msg2 = kafka_to_dict(msg2_raw)							
