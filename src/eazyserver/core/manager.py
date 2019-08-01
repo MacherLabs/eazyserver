@@ -45,7 +45,7 @@ class Manager(object):
 
 	def onSignal(self):
 		logger.info("Manager Signal Handler Initialized.")
-		logger.info('My PID is:', os.getpid())
+		logger.info('My PID is:', str(os.getpid()))
 
 		signal.signal(signal.SIGUSR1, self.receiveSignal)
 		signal.signal(signal.SIGUSR2, self.receiveSignal)
