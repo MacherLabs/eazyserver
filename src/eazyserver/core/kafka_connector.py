@@ -52,11 +52,17 @@ def formatOutput(output,behavior,source_data):
 		if output["source_id"] is None or output["source_id"] == output["_id"]:
 			output["_created"] = output["_updated"]
 		else:
+            # Propagate _created from input data which is source (_id of input specified as source_id of output)
 			for data in source_data:
 				if output["source_id"] == data["_id"]:
 					output["_created"] = data["_created"]
 					break
-
+            # Propagate _created time based upon same source_id of input data
+			for data in source_data:
+				if output["source_id"] == data["source_id"]:
+					output["_created"] = data["_created"]
+					break
+                    
 	if "_created" not in output: 		
 		logger.info("{} | source_id  {} not found for id {}".format(output["_producer"],output["source_id"],output["_id"]))
 		output["_created"] = output["_updated"]
