@@ -22,18 +22,13 @@ from confluent_kafka import TopicPartition
 def kafka_to_dict(kafka_msg):
 	try:
 		msg = json.loads(kafka_msg.value())
+		kafka_msg_id = "{id}:{topic}:{partition}:{offset}".format(**{ "id":msg["_id"],"offset":kafka_msg.offset(), "partition": kafka_msg.partition(), "topic":kafka_msg.topic() })
+		msg["_kafka__id"]= kafka_msg_id
 	except Exception as e:
-		print("Json Decode Error:")
-		print(e)
-		print(kafka_msg.value())
-		print("offset : %s",kafka_msg.offset())
-		print("kafka msg : %s",kafka_msg)
-		import remote_pdb; remote_pdb.set_trace(host='0.0.0.0', port=4444)
-
-		
-
-	kafka_msg_id = "{id}:{topic}:{partition}:{offset}".format(**{ "id":msg["_id"],"offset":kafka_msg.offset(), "partition": kafka_msg.partition(), "topic":kafka_msg.topic() })
-	msg["_kafka__id"]= kafka_msg_id
+		logger.error("Json Decode Error:offset {}:{}".format(kafka_msg.offset(),e))
+		filename = "/LFS/dump/"+str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+		with open(filename,"wb") as f: f.write(kafka_msg.value())
+		msg=None
 	return msg
 	
 def dict_to_kafka(output,source_data):
@@ -128,6 +123,9 @@ class KafkaConnector(object):
 				logger.info("Consumed | {} | Topic : {}".format(self.behavior.__class__.__name__, self.consumer_topic))
 				kafka_msg = self.consumer.consume(num_messages=1)[0]
 				msg = kafka_to_dict(kafka_msg)
+				if msg is None:
+					logger.error("Skipping frame: Consumer 1")
+					continue
 			else:
 				msg = None
 
@@ -137,6 +135,9 @@ class KafkaConnector(object):
 					if(self.sync_consumer):
 						kafka_msg = self.consumer2.consume(num_messages=1)[0]
 						msg2 = kafka_to_dict(kafka_msg)
+						if msg2 is None:
+							logger.error("Skipping frame: Consumer 2")
+							continue
 						assert msg2["_id"] == msg["source_id"]
 					else:
 						msg2_raw = self.consumer2.poll(timeout=0.01)
