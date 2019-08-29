@@ -19,3 +19,4 @@ gunicorn==19.9.0
 flatten_json==0.1.6
 influxdb==5.0.0
 confluent-kafka==1.1.0
+remote_pdb

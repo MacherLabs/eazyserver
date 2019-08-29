@@ -20,7 +20,18 @@ from confluent_kafka import TopicPartition
 # 	return jsn
 
 def kafka_to_dict(kafka_msg):
-	msg = json.loads(kafka_msg.value())
+	try:
+		msg = json.loads(kafka_msg.value())
+	except Exception as e:
+		print("Json Decode Error:")
+		print(e)
+		print(kafka_msg.value())
+		print("offset : %s",kafka_msg.offset())
+		print("kafka msg : %s",kafka_msg
+		import remote_pdb; remote_pdb.set_trace(host='0.0.0.0', port=4444)
+
+		
+
 	kafka_msg_id = "{id}:{topic}:{partition}:{offset}".format(**{ "id":msg["_id"],"offset":kafka_msg.offset(), "partition": kafka_msg.partition(), "topic":kafka_msg.topic() })
 	msg["_kafka__id"]= kafka_msg_id
 	return msg
