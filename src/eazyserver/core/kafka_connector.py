@@ -27,7 +27,7 @@ def kafka_to_dict(kafka_msg):
 		print(e)
 		print(kafka_msg.value())
 		print("offset : %s",kafka_msg.offset())
-		print("kafka msg : %s",kafka_msg
+		print("kafka msg : %s",kafka_msg)
 		import remote_pdb; remote_pdb.set_trace(host='0.0.0.0', port=4444)
 
 		
