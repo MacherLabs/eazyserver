@@ -11,9 +11,9 @@ LOGGER_CONFIG = os.path.join(BASE_DIR, 'logger.conf')
 #     version = version_file.read().strip()
 
 
-__author__ = """Ashutosh Mishra"""
-__email__ = 'ashutoshdtu@gmail.com'
-__version__ = '0.2.7'
+__author__ = """Saurabh Yadav"""
+__email__ = 'saurabh@vedalabs.in'
+__version__ = '0.4.1'
 
 
 import logging
