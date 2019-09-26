@@ -31,8 +31,8 @@ setup_requirements = [ ]
 test_requirements = [ ]
 
 setup(
-    author="Raunaq",
-    author_email='raunaq@vedalabs.in',
+    author="Saurabh Yadav",
+    author_email='saurabh@vedalabs.in',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
