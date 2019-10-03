@@ -11,6 +11,8 @@ from confluent_kafka import Producer as KafkaProducer
 from confluent_kafka import Consumer as KafkaConsumer
 from confluent_kafka import TopicPartition
 
+from datetime import datetime
+
 #############################
 ## Helper Methods
 #############################
