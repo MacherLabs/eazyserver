@@ -105,7 +105,7 @@ class KafkaConnector(object):
 
 				# if both consumers are specified
 				if(self.client.consumer_2_topic):
-					print("BOTH CONSUMER PRESENT")
+					# print("BOTH CONSUMER PRESENT")
 
 					if(self.kafka_client_config['sync_consumers']):
 						# sync_consumer = True
