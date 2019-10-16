@@ -10,6 +10,7 @@ import pprint
 from confluent_kafka import Producer as KafkaProducer
 from confluent_kafka import Consumer as KafkaConsumer
 from confluent_kafka import TopicPartition
+import os
 
 from datetime import datetime
 
