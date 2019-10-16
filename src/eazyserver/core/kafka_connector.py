@@ -117,8 +117,8 @@ class KafkaConnector(object):
 						message_1 = self.client.consume1()
 					
 					# Received both messages
-					source_data.append(message_2)
-					source_data.append(message_1)
+					if message_1: source_data.append(message_1)
+					if message_2: source_data.append(message_2)
 					output = self.behavior.run(message_1, message_2)
 
 				elif(self.client.consumer_1_topic):
