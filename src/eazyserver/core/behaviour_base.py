@@ -17,7 +17,7 @@ def get_beh_config(behaviour_type, behaviour_id):
 
     resp = {}
     try:
-        resp = requests.get(final_url, auth=Veda_auth)
+        resp = requests.get(final_url, auth=Veda_auth, timeout=10)
         resp.raise_for_status()
         resp = resp.json()
     except Exception as e:
