@@ -6,7 +6,7 @@ import os
 import sys
 import signal
 
-from kafka_connector import KafkaConnector
+from .kafka_connector import KafkaConnector
 import threading
 
 class Manager(object):

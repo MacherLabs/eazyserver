@@ -10,8 +10,8 @@ import pprint
 from bson.objectid import ObjectId
 from datetime import datetime
 
-from pykafka_connector import Kafka_PyKafka
-from confluent_kafka_connector import Kafka_Confluent
+from .pykafka_connector import Kafka_PyKafka
+from .confluent_kafka_connector import Kafka_Confluent
 
 
 # TODO: Move/Add formatOutput to behaviour base class 
