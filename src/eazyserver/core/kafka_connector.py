@@ -29,6 +29,31 @@ def formatOutput(output,behavior,source_data):
 			output["source_id"] = source_data[-1]["_id"]
 		else:  # This is Producer
 			output["source_id"] = output["_id"]
+
+	# source_config chaining for stream
+	if source_data: # Select rightmost consumer
+		output_source_config = source_data[-1]["source_config"]
+	else:
+		# init from behaviour config values 
+		output_source_config ={
+			"organization":behavior.config.get("organization", ""),
+			"hub":behavior.config.get("hub", ""),
+			"camera":behavior.config.get("camera", behavior.config.get("_id", "")),
+			"behaviourType":behavior.config.get("behaviourType", ""),
+			"behaviour":behavior.config.get("_id", ""),
+		}
+		# Handle embedded=true case
+		for key,value in output_source_config.items():
+			if type(value) ==dict:
+				output_source_config[key] = value.get("_id","")
+		# Handle camera type
+		if output_source_config["behaviour"] == output_source_config["camera"]:
+			output_source_config["behaviour"] = ""
+			output_source_config["behaviourType"] = "camera"
+
+	output_source_config.update(output.get("source_config",{}))
+	output["source_config"]=output_source_config
+
 	if "_created" not in output: 
 		if output["source_id"] is None or output["source_id"] == output["_id"]:
 			output["_created"] = output["_updated"]
