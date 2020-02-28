@@ -51,6 +51,9 @@ class Manager(object):
 
 		# Handle update if not handled already
 		if not UpdateSuccess:
+			self.socketClient.sio.disconnect()
+			self.connected_behaviour.stop()
+			self.connected_behaviour_thread.join(timeout=10)
 			exit(100)
 
 	# register update event callback
@@ -63,8 +66,8 @@ class Manager(object):
 	###### Run Method
 	def run(self):
 		logger.info("Manager run() called.")
-		main_connector_thread = threading.Thread(target=self.connected_behaviour.run)
-		main_connector_thread.start()
+		self.connected_behaviour_thread = threading.Thread(target=self.connected_behaviour.run)
+		self.connected_behaviour_thread.start()
 		
 
 	def onStart(self):

@@ -85,6 +85,7 @@ class KafkaConnector(object):
 	def __init__(self, Behaviour, kafka_client_type="confluent", **kwargs):
 
 		self.kafka_should_run = True
+		self.should_stop =False
 		self.client = None
 		self.behavior = Behaviour
 
@@ -114,6 +115,10 @@ class KafkaConnector(object):
 		logger.info("Disbaling Kafka")
 		self.kafka_should_run = False
 
+	def stop(self):
+		logger.info("Behaviour is schedule for shutdown.")
+		self.should_stop = True
+
 	###### Update Related Functions
 	# Topics to be subscribed
 	def subscriptionTopics(self,subscriptions=[]):
@@ -132,7 +137,7 @@ class KafkaConnector(object):
 	# Main Method
 	def run(self):
 
-		while(True):
+		while(not self.should_stop):
 			if(self.kafka_should_run):
 				source_data = []
 
@@ -184,4 +189,6 @@ class KafkaConnector(object):
 			else:
 				logger.info("Kafka Connector paused (self.kafka_should_run = False). Sleeping for 30 secs...")
 				time.sleep(30)
+
+		logger.info("Behavior is Exiting!!")
 
