@@ -7,6 +7,7 @@ from bson import json_util
 
 import json
 import requests
+from requests.auth import HTTPBasicAuth
 from flask import jsonify, Response
 
 from threading import Event
@@ -18,7 +19,9 @@ class VedaSocketIO():
         # #TODO: Generalise AUTH config: change VedaUser to User and so on.
         if api_config is None:
             from flask import current_app as app
-            api_config = app.config['VEDA_AUTH']
+            self.config = app.config
+        else:
+            self.config=api_config
 
         self.oneTimeLoginCalled = False
         self.LoggedinSuccess = Event()
@@ -26,8 +29,8 @@ class VedaSocketIO():
         self.userid=""
         self.loginCreds= {
             "auth": {
-                "username": api_config['VedaUser'],
-                "password": api_config['VedaPassword']
+                "username": self.config['VEDA_USER'],
+                "password": self.config['VEDA_PASSWORD']
             },
             "roomno":""
         }
@@ -66,7 +69,7 @@ class VedaSocketIO():
         def disconnect():
             print('disconnected from server')
 
-        socketioServer = os.environ.get('SOCKETIO_SERVER', 'localhost')
+        socketioServer = os.environ.get('SOCKETIO_SERVER', self.config.get("VEDA_SERVER_URL","localhost"))
         print(socketioServer)
         self.sio.connect(socketioServer)
 
@@ -108,13 +111,10 @@ class VedaSocketIO():
                 # query = { "username": self.loginCreds['auth']['username'] }
                 # user = usersCol.find_one(query)
 
-                url = os.environ.get('SOCKETIO_SERVER', 'localhost')+"/v1/rest/login"
+                url = self.config.get("VEDA_SERVER_URL","localhost")+"/v1/rest/login"
                 data = self.loginCreds["auth"]
-                headers = {
-                    'content-type': "application/json",
-                    'authorization': "Basic c2F1cmFiaEB2ZWRhbGFicy5pbjojV2FrZXVwQDY="
-                    }
-                response = requests.request("POST", url, json=data, headers=headers, timeout=10)
+                auth = HTTPBasicAuth(self.config['VEDA_USER'], self.config['VEDA_PASSWORD'])
+                response = requests.request("POST", url, json=data, auth=auth, timeout=10)
                 response.raise_for_status()
                 user=response.json()
 
