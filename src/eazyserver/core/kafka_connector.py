@@ -114,6 +114,22 @@ class KafkaConnector(object):
 		logger.info("Disbaling Kafka")
 		self.kafka_should_run = False
 
+	###### Update Related Functions
+	# Topics to be subscribed
+	def subscriptionTopics(self,subscriptions=[]):
+		subscriptions = self.behavior.subscriptionTopics(subscriptions)
+		return subscriptions
+
+	# update event callback
+	def update(self, data):
+		logger.debug("KafkaConnector: Update triggered with data:{}".format(data))
+		UpdateSuccess = self.behavior.update(data)
+		logger.debug("KafkaConnector: Hot update status:{}".format(UpdateSuccess))
+		
+		return UpdateSuccess
+
+
+	# Main Method
 	def run(self):
 
 		while(True):
