@@ -8,11 +8,11 @@ def get_beh_config(behaviour_type, behaviour_id):
     from requests.auth import HTTPBasicAuth
     from flask import current_app as app
 
-    #TODO: Generalise AUTH config: change VedaUser to User and so on.
-    api_config = app.config['VEDA_AUTH']
-    Veda_auth = HTTPBasicAuth(api_config['VedaUser'], api_config['VedaPassword'])
+    #TODO: Generalise AUTH config: change VEDA_USER to User and so on.
+    api_config = app.config
+    Veda_auth = HTTPBasicAuth(api_config['VEDA_USER'], api_config['VEDA_PASSWORD'])
 
-    final_url = "{}/{}/{}/{}".format(api_config['ServerUrl'], api_config['API_VERSION'], behaviour_type, behaviour_id)     
+    final_url = "{}/{}/{}/{}".format(api_config['VEDA_SERVER_URL'], api_config['VEDA_API_VERSION'], behaviour_type, behaviour_id)     
     logging.info("Fetching Behaviour config: {}".format(final_url))
 
     resp = {}
