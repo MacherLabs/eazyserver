@@ -40,52 +40,54 @@ class Behaviour(object):
             config = get_beh_config(behaviour_type=behaviour_type, behaviour_id=behaviour_id)
         
         self.id = config["_id"]
+        self.offlineMode = not bool(behaviour_id)
         self.config  = config
         self.enabled = config.get("enabled",True)
 
     ###### Update Related Functions
     # Topics to be subscribed
     def subscriptionTopics(self,subscriptions=[]):
-        if "camera" in self.config:
-            # Behaviour update subscription
+        if not self.offlineMode: # If config is online based
+            if "camera" in self.config:
+                # Behaviour update subscription
+                subscriptions.append(
+                    {
+                        "_id": self.id,
+                        'topic':'behaviours',
+                        'eventType': 'Updated'
+                    }
+                )        
+                subscriptions.append(
+                    {
+                        "_id": self.id,
+                        'topic':'behaviours',
+                        'eventType': 'Replaced'
+                    }
+                )
+            # Camera update subscription
+            # if type is behaviour
+            if "camera" in self.config:
+                camera_id = self.config["camera"]
+                # Handle embedded=True case
+                if type(camera_id) == dict:    
+                    camera_id = camera_id["_id"]
+            else:
+                camera_id = self.id
+            
             subscriptions.append(
                 {
-                    "_id": self.id,
-                    'topic':'behaviours',
+                    "_id": camera_id,
+                    'topic':'cameras',
                     'eventType': 'Updated'
                 }
-            )        
+            ) 
             subscriptions.append(
                 {
-                    "_id": self.id,
-                    'topic':'behaviours',
+                    "_id": camera_id,
+                    'topic':'cameras',
                     'eventType': 'Replaced'
                 }
-            )
-        # Camera update subscription
-        # if type is behaviour
-        if "camera" in self.config:
-            camera_id = self.config["camera"]
-             # Handle embedded=True case
-            if type(camera_id) == dict:    
-                camera_id = camera_id["_id"]
-        else:
-            camera_id = self.id
-        
-        subscriptions.append(
-            {
-                "_id": camera_id,
-                'topic':'cameras',
-                'eventType': 'Updated'
-            }
-        ) 
-        subscriptions.append(
-            {
-                "_id": camera_id,
-                'topic':'cameras',
-                'eventType': 'Replaced'
-            }
-        ) 
+            ) 
 
         return subscriptions
 
