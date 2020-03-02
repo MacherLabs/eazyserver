@@ -48,7 +48,8 @@ def _get_cached_config_key(behaviour_id):
 # Cache config to file
 def cache_config(behaviour_id,config):
     key = _get_cached_config_key(behaviour_id)
-    expire_time = config.get("params",{}).get("config_cache_validity",7)
+    # config_cache_validity in days with float value data type, default 7 days.
+    expire_time = config.get("params",{}).get("config_cache_validity",7) 
     cache = Cache(directory=".")
     cache.set(key, value=config,expire=int(expire_time*24*60*60))
     return config
@@ -59,7 +60,8 @@ def get_cached_config(behaviour_id):
     cache = Cache(directory=".")
     config = cache.get(key,None)
     if config is not None:
-        if config.get("params",{}).get("config_cache_disable",False):
+        # config_cache_disable boolen param for disabling cache.By default caching is enabled
+        if config.get("params",{}).get("config_cache_disable",False):   
             config=None
             logger.info("cached config disabled for id: {}".format(behaviour_id))
     else:
