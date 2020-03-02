@@ -13,6 +13,7 @@ from bson.son import SON
 from bson.objectid import ObjectId
 from eve.utils import str_to_date, date_to_rfc1123
 from flask import current_app as app
+import threading
 
 def bson_to_json(_object):
     return json.loads(json.dumps(_object, default=json_util.default))
@@ -44,3 +45,13 @@ def list_routes():
         }
         routes.append(route)
     return routes
+ 
+# Execute a function call in thread
+def threaded(call, *args, **kwargs):
+    """Execute ``call(*args, **kwargs)`` in a thread"""
+    thread = threading.Thread(target=call, args=args, kwargs=kwargs)
+    thread.start()
+    return thread
+
+def is_main_thread_active():
+    return any((i.name == "MainThread") and i.is_alive() for i in threading.enumerate())

@@ -2,8 +2,11 @@ from eazyserver.core.vedaio import VedaSocketIO
 from time import sleep
 
 api_config ={
-    'VedaUser': "tempuser",
-    'VedaPassword': "tempuser"
+    'VEDA_USER': "tempuser",
+    'VEDA_PASSWORD': "tempuser",
+    'VEDA_API_VERSION' : 'v1/rest',
+    'VEDA_DEVICE_ID' : '5a609e3ffc94243786cc9ba9',
+    'VEDA_SERVER_URL' : 'https://api.staging.vedalabs.in',
 }
 
 socketClient=VedaSocketIO(api_config)

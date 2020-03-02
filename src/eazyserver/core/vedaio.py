@@ -11,6 +11,9 @@ from requests.auth import HTTPBasicAuth
 from flask import jsonify, Response
 
 from threading import Event
+from .utils import threaded,is_main_thread_active
+from time import sleep
+
 
 class VedaSocketIO():
     def __init__(self,api_config=None, subscriptions=[]):
@@ -69,16 +72,41 @@ class VedaSocketIO():
         def disconnect():
             print('disconnected from server')
 
+
         socketioServer = os.environ.get('SOCKETIO_SERVER', self.config.get("VEDA_SERVER_URL","localhost"))
         print(socketioServer)
-        self.sio.connect(socketioServer)
+        threaded(self.connect_with_retry,socketioServer)
 
-    def subscribe(self,topic, timeout=5, remember=True):
+    # Connect to socket server with retries, use utils.threaded for background connection
+    def connect_with_retry(self, url, retry=0, retry_interval=5, *args, **kwargs):
+        while (is_main_thread_active()):
+            try:
+                self.sio.connect(url)
+                break
+            except socketio.exceptions.ConnectionError as e:
+                logger.error("VEDAIO Connection failure: retrying again.{}".format(retry))
+                continue
+            except Exception as e:
+                logger.error("VEDAIO Connection failure: {}".format(e))
+                break
+            finally:
+                if retry == 1: break
+                elif retry >1 :
+                    retry -= 1
+                
+                sleep(retry_interval)
+                
+
+    def subscribe(self,topic, timeout=5, remember=True, remember_on_failure=True):
         # check for login status
         if not self.LoggedinSuccess.is_set():
             success=self.LoggedinSuccess.wait(timeout=timeout)
             if not success:
-                raise RuntimeError("Log in timed out")
+                if remember_on_failure:
+                    self.subscriptions.append(topic)
+                    return
+                else:
+                    raise RuntimeError("Log in timed out")
         
         # Subscribe
         print("Subscribing............")
