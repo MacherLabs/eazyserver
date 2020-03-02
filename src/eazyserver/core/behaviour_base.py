@@ -6,6 +6,8 @@ import json
 import os
 import time
 
+from diskcache import Cache 
+
 # Import app to get api_config
 def get_beh_config(behaviour_type, behaviour_id):
     import requests
@@ -39,43 +41,30 @@ def get_beh_config(behaviour_type, behaviour_id):
     return resp
 
 # Cached config file name 
-def _get_cached_config_file(behaviour_id):
-    filename = ".cachedconfig_{}.json".format(behaviour_id)
-    return filename
+def _get_cached_config_key(behaviour_id):
+    key = "config_{}".format(behaviour_id)
+    return key
 
 # Cache config to file
 def cache_config(behaviour_id,config):
-    filename = _get_cached_config_file(behaviour_id)
-    with open(filename,"wb") as f:
-        json.dump(config,f)
+    key = _get_cached_config_key(behaviour_id)
+    expire_time = config.get("params",{}).get("config_cache_validity",7)
+    cache = Cache(directory=".")
+    cache.set(key, value=config,expire=int(expire_time*24*60*60))
     return config
 
 # Retrieve cached config from file
 def get_cached_config(behaviour_id):
-    config = None
-    try:
-        filename = _get_cached_config_file(behaviour_id)
-        if os.path.isfile(filename):
-            with open(filename,"rb") as f:
-                _config = json.load(f)
-                config_cache_validity = _config.get("params",{}).get("config_cache_validity",7)   # Default validity = 1 week (7 days)
-                config_cache_disabled = _config.get("params",{}).get("config_cache_disable",False)  # Caching enabled by default
-                if not config_cache_disabled:
-                    # check for cache validity
-                    time_in_secs = time.time() - (config_cache_validity * 24 * 60 * 60)
-                    stat = os.stat(filename)
-                    if stat.st_mtime >= time_in_secs:
-                        config = _config
-                    else:
-                        logger.info("cached config expired for id: {}".format(behaviour_id))
-
-        else:
-            logger.info("No cached config found for id: {}".format(behaviour_id))
-    except Exception as e:
-        logger.error("Failed to read cached config for id {}: Exception:{}".format(behaviour_id,e),exc_info=True)
-
+    key = _get_cached_config_key(behaviour_id)
+    cache = Cache(directory=".")
+    config = cache.get(key,None)
+    if config is not None:
+        if config.get("params",{}).get("config_cache_disable",False):
+            config=None
+            logger.info("cached config disabled for id: {}".format(behaviour_id))
+    else:
+        logger.info("valid cached config not found for id: {}".format(behaviour_id))
     return config
-
 
 class Behaviour(object):
     def __init__(self, config, behaviour_id=None, behaviour_type="behaviours"):
