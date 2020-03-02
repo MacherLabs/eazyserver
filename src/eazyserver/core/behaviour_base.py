@@ -50,14 +50,14 @@ def cache_config(behaviour_id,config):
     key = _get_cached_config_key(behaviour_id)
     # config_cache_validity in days with float value data type, default 7 days.
     expire_time = config.get("params",{}).get("config_cache_validity",7) 
-    cache = Cache(directory="/LFS")
+    cache = Cache(directory="/persistant_cache")
     cache.set(key, value=config,expire=int(expire_time*24*60*60))
     return config
 
 # Retrieve cached config from file
 def get_cached_config(behaviour_id):
     key = _get_cached_config_key(behaviour_id)
-    cache = Cache(directory="/LFS")
+    cache = Cache(directory="/persistant_cache")
     config = cache.get(key,None)
     if config is not None:
         # config_cache_disable boolen param for disabling cache.By default caching is enabled
