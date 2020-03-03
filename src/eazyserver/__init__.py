@@ -13,7 +13,7 @@ LOGGER_CONFIG = os.path.join(BASE_DIR, 'logger.conf')
 
 __author__ = """Saurabh Yadav"""
 __email__ = 'saurabh@vedalabs.in'
-__version__ = '0.5.1'
+__version__ = '1.0.0'
 
 
 import logging
