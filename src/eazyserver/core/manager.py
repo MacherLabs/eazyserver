@@ -6,8 +6,9 @@ import os
 import sys
 import signal
 
-from kafka_connector import KafkaConnector
+from .kafka_connector import KafkaConnector
 import threading
+from .vedaio import VedaSocketIO
 
 class Manager(object):
 	Type = "Manager"
@@ -31,11 +32,43 @@ class Manager(object):
 		signal.signal(10, self.receiveSignal)
 		signal.signal(12, self.receiveSignal)
 
+		# Socket IO based Live updates
+		if not self.connected_behaviour.behavior.offlineMode:
+			self.socketClient=VedaSocketIO(subscriptions=self.subscriptionTopics())
+			self.registerUpdateHandler()
+	
+	
+	###### Update Related Functions
+	def subscriptionTopics(self,subscriptions=[]):
+		subscriptions = self.connected_behaviour.subscriptionTopics(subscriptions)
+		logger.info("Manager: Subscription Topics: {}".format(subscriptions))
+		return subscriptions
 
+	# update event callback
+	def update(self, data):
+		logger.info("Manager: Update triggered with data:{}".format(data))
+		UpdateSuccess = self.connected_behaviour.update(data)
+		logger.info("Manager: Hot update status:{}".format(UpdateSuccess))
+
+		# Handle update if not handled already
+		if not UpdateSuccess:
+			self.socketClient.sio.disconnect()
+			self.connected_behaviour.stop()
+			self.connected_behaviour_thread.join(timeout=10)
+			exit(100)
+
+	# register update event callback
+	def registerUpdateHandler(self):
+		@self.socketClient.sio.on("message")
+		def my_message(data):
+			self.update(data)
+
+
+	###### Run Method
 	def run(self):
 		logger.info("Manager run() called.")
-		main_connector_thread = threading.Thread(target=self.connected_behaviour.run)
-		main_connector_thread.start()
+		self.connected_behaviour_thread = threading.Thread(target=self.connected_behaviour.run)
+		self.connected_behaviour_thread.start()
 		
 
 	def onStart(self):

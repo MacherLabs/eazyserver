@@ -10,8 +10,8 @@ import pprint
 from bson.objectid import ObjectId
 from datetime import datetime
 
-from pykafka_connector import Kafka_PyKafka
-from confluent_kafka_connector import Kafka_Confluent
+from .pykafka_connector import Kafka_PyKafka
+from .confluent_kafka_connector import Kafka_Confluent
 
 
 # TODO: Move/Add formatOutput to behaviour base class 
@@ -29,6 +29,31 @@ def formatOutput(output,behavior,source_data):
 			output["source_id"] = source_data[-1]["_id"]
 		else:  # This is Producer
 			output["source_id"] = output["_id"]
+
+	# source_config chaining for stream
+	if source_data: # Select rightmost consumer
+		output_source_config = source_data[-1]["source_config"]
+	else:
+		# init from behaviour config values 
+		output_source_config ={
+			"organization":behavior.config.get("organization", ""),
+			"hub":behavior.config.get("hub", ""),
+			"camera":behavior.config.get("camera", behavior.config.get("_id", "")),
+			"behaviourType":behavior.config.get("behaviourType", ""),
+			"behaviour":behavior.config.get("_id", ""),
+		}
+		# Handle embedded=true case
+		for key,value in output_source_config.items():
+			if type(value) ==dict:
+				output_source_config[key] = value.get("_id","")
+		# Handle camera type
+		if output_source_config["behaviour"] == output_source_config["camera"]:
+			output_source_config["behaviour"] = ""
+			output_source_config["behaviourType"] = "camera"
+
+	output_source_config.update(output.get("source_config",{}))
+	output["source_config"]=output_source_config
+
 	if "_created" not in output: 
 		if output["source_id"] is None or output["source_id"] == output["_id"]:
 			output["_created"] = output["_updated"]
@@ -60,6 +85,7 @@ class KafkaConnector(object):
 	def __init__(self, Behaviour, kafka_client_type="confluent", **kwargs):
 
 		self.kafka_should_run = True
+		self.should_stop =False
 		self.client = None
 		self.behavior = Behaviour
 
@@ -89,9 +115,29 @@ class KafkaConnector(object):
 		logger.info("Disbaling Kafka")
 		self.kafka_should_run = False
 
+	def stop(self):
+		logger.info("Behaviour is schedule for shutdown.")
+		self.should_stop = True
+
+	###### Update Related Functions
+	# Topics to be subscribed
+	def subscriptionTopics(self,subscriptions=[]):
+		subscriptions = self.behavior.subscriptionTopics(subscriptions)
+		return subscriptions
+
+	# update event callback
+	def update(self, data):
+		logger.debug("KafkaConnector: Update triggered with data:{}".format(data))
+		UpdateSuccess = self.behavior.update(data)
+		logger.debug("KafkaConnector: Hot update status:{}".format(UpdateSuccess))
+		
+		return UpdateSuccess
+
+
+	# Main Method
 	def run(self):
 
-		while(True):
+		while(not self.should_stop):
 			if(self.kafka_should_run):
 				source_data = []
 
@@ -143,4 +189,6 @@ class KafkaConnector(object):
 			else:
 				logger.info("Kafka Connector paused (self.kafka_should_run = False). Sleeping for 30 secs...")
 				time.sleep(30)
+
+		logger.info("Behavior is Exiting!!")
 
