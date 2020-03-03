@@ -23,6 +23,7 @@ pykafka
 pprint
 python-socketio
 python-socketio[client]
+diskcache
 
 #requires librdkafka-dev to be installed
 #apt-get install -y  librdkafka-dev
