@@ -33,7 +33,7 @@ class Manager(object):
 		signal.signal(12, self.receiveSignal)
 
 		# Socket IO based Live updates
-		if not self.connected_behaviour.behavior.offlineMode():
+		if not self.connected_behaviour.behavior.offlineMode:
 			self.socketClient=VedaSocketIO(subscriptions=self.subscriptionTopics())
 			self.registerUpdateHandler()
 	
