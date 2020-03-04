@@ -67,7 +67,8 @@ class Manager(object):
 	###### Run Method
 	def run(self):
 		logger.info("Manager run() called.")
-		self.connected_behaviour_thread = threading.Thread(target=self.connected_behaviour.run)
+		from flask import current_app as app
+		self.connected_behaviour_thread = threading.Thread(target=self.connected_behaviour.run, args=(app._get_current_object(),))
 		self.connected_behaviour_thread.start()
 		
 

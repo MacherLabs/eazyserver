@@ -135,7 +135,8 @@ class KafkaConnector(object):
 
 
 	# Main Method
-	def run(self):
+	def run(self,app):
+		app.app_context().push()
 
 		while(not self.should_stop):
 			if(self.kafka_should_run):
