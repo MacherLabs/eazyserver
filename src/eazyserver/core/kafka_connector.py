@@ -32,7 +32,10 @@ def formatOutput(output,behavior,source_data):
 
 	# source_config chaining for stream
 	if source_data: # Select rightmost consumer
-		output_source_config = source_data[-1]["source_config"]
+        try:
+		    output_source_config = source_data[-1]["source_config"]
+        except:
+            output_source_config = output["source_config"]
 	else:
 		# init from behaviour config values 
 		output_source_config ={
