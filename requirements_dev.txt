@@ -28,3 +28,6 @@ diskcache
 #requires librdkafka-dev to be installed
 #apt-get install -y  librdkafka-dev
 #RDKAFKA_INSTALL=system pip install pykafka
+
+#https://github.com/pyeve/eve/issues/1359
+werkzeug==0.16.1
