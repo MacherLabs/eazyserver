@@ -21,7 +21,7 @@ influxdb==5.0.0
 confluent-kafka==1.1.0
 pykafka
 pprint
-python-socketio
+python-socketio==4.4.0
 python-socketio[client]
 diskcache
 
