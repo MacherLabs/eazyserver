@@ -83,7 +83,7 @@ def formatOutput(output,behavior,source_data):
 class KafkaConnector(object):
     Type = "KafkaConnector"
 
-    def __init__(self, Behaviour, kafka_client_type="confluent", **kwargs):
+    def __init__(self, Behaviour, kafka_client_type="confluent", on_exit=None, **kwargs):
 
         self.kafka_should_run = True
         self.should_stop =False
@@ -92,6 +92,8 @@ class KafkaConnector(object):
 
         self.kafka_client_type = kafka_client_type
         self.kafka_client_config = kwargs
+        self.exit_callbacks=[]
+        if on_exit: self.exit_callbacks.append(on_exit)
         
         # TODO : Validate **kwargs
 
@@ -197,6 +199,10 @@ class KafkaConnector(object):
             logger.error("Exception in Behaviour code:{}",e)
             print("-"*60)
             traceback.print_exc(file=sys.stdout)
+            self.on_exit(101)
             print("-"*60)
-            raise     
+            exit(101)     
 
+    def on_exit(self,exit_code):
+        for callback in self.exit_callbacks:
+            callback(exit_code)

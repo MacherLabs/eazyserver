@@ -19,11 +19,14 @@ class Manager(object):
 		self.behaviour = kwargs.get('behaviour')
 		self.connector_type = kwargs.get('connector_type')
 		self.kafka_client_type = kwargs.get('kafka_client_type')
-		self.kafka_client_config = kwargs.get('kafka_client_config')
+		self.kafka_client_config = kwargs.get('kafka_client_config')		
+		self.pid = os.getpid()
+		self.exit_code = 0
 
 		self.connected_behaviour = KafkaConnector(
 			self.behaviour, 
 			kafka_client_type=self.kafka_client_type, 
+			on_exit=self.stop,
 			**self.kafka_client_config)
 		
 		self.signal_map = kwargs.get('signal_map', {})
@@ -31,6 +34,7 @@ class Manager(object):
 		# Set Kafka Enable/Disable on SIGUSR2 (12)
 		signal.signal(10, self.receiveSignal)
 		signal.signal(12, self.receiveSignal)
+		signal.signal(signal.SIGTERM, self.receiveSignal)
 
 		# Socket IO based Live updates
 		if not self.connected_behaviour.behavior.offlineMode:
@@ -52,10 +56,7 @@ class Manager(object):
 
 		# Handle update if not handled already
 		if not UpdateSuccess:
-			self.socketClient.sio.disconnect()
-			self.connected_behaviour.stop()
-			self.connected_behaviour_thread.join(timeout=10)
-			exit(100)
+			self.stop(exit_code=100)
 
 	# register update event callback
 	def registerUpdateHandler(self):
@@ -95,6 +96,9 @@ class Manager(object):
 			logger.info("Disabling Kafka")
 			self.connected_behaviour.disable_kafka()
 
+		if (signal_number == signal.SIGTERM):
+			logger.info("Stopping Everything")
+			self.cleanup()
 
 	def onSignal(self):
 		logger.info("Manager Signal Handler Initialized.")
@@ -105,6 +109,17 @@ class Manager(object):
 			print("Registering Signal = {}".format(k))
 			signal.signal(k, self.receiveSignal)
 
+	def stop(self, exit_code=0):
+		logger.info("Stopping function triggered with exit_code:{}".format(exit_code))
+		self.exit_code=exit_code
+		os.kill(self.pid, signal.SIGTERM)
+	
+	def cleanup(self):
+		if not self.connected_behaviour.behavior.offlineMode:
+			self.socketClient.sio.disconnect()
+		self.connected_behaviour.stop()
+		self.connected_behaviour_thread.join(timeout=10)
+		exit(self.exit_code)
 
 
 
