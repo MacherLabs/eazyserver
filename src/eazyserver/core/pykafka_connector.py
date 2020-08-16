@@ -5,7 +5,7 @@ logger.debug("Loaded " + __name__)
 import json
 import time
 import sys
-from prettyprinter import pprint
+import prettyprinter as pprint
 
 from pykafka import KafkaClient
 from pykafka.common import OffsetType
