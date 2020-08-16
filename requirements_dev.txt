@@ -19,11 +19,11 @@ gunicorn==19.9.0
 flatten_json==0.1.6
 influxdb==5.0.0
 confluent-kafka==1.1.0
-pykafka
-pprint
+pykafka==2.8.0
+prettyprinter==0.18.0
 python-socketio==4.4.0
 python-socketio[client]
-diskcache
+diskcache==4.1.0
 
 #requires librdkafka-dev to be installed
 #apt-get install -y  librdkafka-dev

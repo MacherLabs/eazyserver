@@ -5,7 +5,7 @@ logger.debug("Loaded " + __name__)
 import json
 import time
 import sys
-import pprint
+from prettyprinter import pprint
 
 from confluent_kafka import Producer as KafkaProducer
 from confluent_kafka import Consumer as KafkaConsumer
@@ -109,7 +109,7 @@ class Kafka_Confluent(object):
 
 		print("="*50)
 		print("Printing Kafka_Confluent kwargs...")
-		import pprint
+		from prettyprinter import pprint
 		pp = pprint.PrettyPrinter(indent=4)
 		pp.pprint(kafka_client_config)
 		print("="*50)
