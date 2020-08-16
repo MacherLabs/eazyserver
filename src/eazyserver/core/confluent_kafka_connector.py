@@ -109,9 +109,9 @@ class Kafka_Confluent(object):
 
 		print("="*50)
 		print("Printing Kafka_Confluent kwargs...")
-		import prettyprinter as pprint
-		pp = pprint.PrettyPrinter(indent=4)
-		pp.pprint(kafka_client_config)
+		# import prettyprinter as pprint
+		# pp = pprint.PrettyPrinter(indent=4)
+		pprint.pprint(kafka_client_config,indent=4)
 		print("="*50)
 
 		self.broker = kafka_client_config["broker"]
