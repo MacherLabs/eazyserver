@@ -7,7 +7,7 @@ import json
 import time
 import sys
 import traceback
-import pprint
+from prettyprinter import pprint
 from bson.objectid import ObjectId
 from datetime import datetime
 
