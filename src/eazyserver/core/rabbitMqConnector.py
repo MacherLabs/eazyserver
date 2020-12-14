@@ -94,12 +94,12 @@ class RabbitMqConnector(object):
         
         # TODO : Validate **kwargs
         
-        RABBIT_SERVER_CONFIG={
+        RABBIT_SERVER_CONFIG=self.client_config.get("rabbitServerConfig",{
             'host':"queue.vedalabs.in",
             'user':'guest',
             'password':'guest',
             'port':5672
-        }
+        })
         
         REST_API_CONFIG=self.client_config.get("restApiConfig",None)
         
@@ -159,11 +159,6 @@ class RabbitMqConnector(object):
     def consume(self,message,props=None,methods=None):
         try:
             consumerTopic=methods.routing_key
-            print("="*50)
-            print("Consuming Message")
-            print("self.consumer_topic",consumerTopic)
-            print("="*50)
-
             output=self.behaviour.run(message)
                 
             if output:
@@ -178,7 +173,6 @@ class RabbitMqConnector(object):
             exit(101)
             
             
-        
         
     def run(self,app):
         app.app_context().push()
