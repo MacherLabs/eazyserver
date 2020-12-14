@@ -193,15 +193,17 @@ class RabbitMqConnector(object):
                     if self.consumerSyncMode !=True:
                         for topic in self.consumerSyncTopics:
                             message=self.client.consume_sync(topic)
-                            output=self.behavior.run(message)
-                            if output:
-                                self.send(output)
+                            if message:
+                                output=self.behavior.run(message)
+                                if output:
+                                    self.send(output)
                                 
                     else:
                         message=self.client.consume_sync_all()
-                        output=self.behavior.run(message)
-                        if output:
-                            self.send(output)
+                        if message:
+                            output=self.behavior.run(message)
+                            if output:
+                                self.send(output)
                             
             except Exception as e:
                 logger.error("Exception in Behaviour code:{}",e)
@@ -211,6 +213,7 @@ class RabbitMqConnector(object):
                 self.on_exit(101)
                 print("-"*60)
                 exit(101)
+            time.sleep(0.01)
                 
 
     def on_exit(self,exit_code):
