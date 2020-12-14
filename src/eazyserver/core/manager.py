@@ -7,6 +7,7 @@ import sys
 import signal
 
 from .kafka_connector import KafkaConnector
+from .rabbitMqConnector import RabbitMqConnector
 import threading
 from .vedaio import VedaSocketIO
 
@@ -17,18 +18,29 @@ class Manager(object):
 		super(Manager, self).__init__()
 
 		self.behaviour = kwargs.get('behaviour')
-		self.connector_type = kwargs.get('connector_type')
-		self.kafka_client_type = kwargs.get('kafka_client_type')
-		self.kafka_client_config = kwargs.get('kafka_client_config')		
+		self.connector_type = kwargs.get('connector_type','kafka')
+		self.kafka_client_type = kwargs.get('kafka_client_type',None)
+		self.kafka_client_config = kwargs.get('kafka_client_config',None)
+		self.client_config=kwargs.get('client_config',None)
+
+		
 		self.pid = os.getpid()
 		self.exit_code = 0
 
-		self.connected_behaviour = KafkaConnector(
-			self.behaviour, 
-			kafka_client_type=self.kafka_client_type, 
-			on_exit=self.stop,
-			**self.kafka_client_config)
-		
+		if connector_type == 'kafka':
+			self.connected_behaviour = KafkaConnector(
+				self.behaviour, 
+				kafka_client_type=self.kafka_client_type, 
+				on_exit=self.stop,
+				**self.kafka_client_config)
+   
+		if connector_type == 'rabbitMq':
+			self.rabbit_client_config = kwargs.get('rabbit_client_config')
+			self.connected_behaviour = RabbitMqConnector(
+				self.behaviour, 
+				on_exit=self.stop,
+				**self.client_config)
+			
 		self.signal_map = kwargs.get('signal_map', {})
 
 		# Set Kafka Enable/Disable on SIGUSR2 (12)
