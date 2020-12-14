@@ -27,14 +27,14 @@ class Manager(object):
 		self.pid = os.getpid()
 		self.exit_code = 0
 
-		if connector_type == 'kafka':
+		if self.connector_type == 'kafka':
 			self.connected_behaviour = KafkaConnector(
 				self.behaviour, 
 				kafka_client_type=self.kafka_client_type, 
 				on_exit=self.stop,
 				**self.kafka_client_config)
    
-		if connector_type == 'rabbitMq':
+		if self.connector_type == 'rabbitMq':
 			self.rabbit_client_config = kwargs.get('rabbit_client_config')
 			self.connected_behaviour = RabbitMqConnector(
 				self.behaviour, 
