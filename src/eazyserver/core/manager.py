@@ -49,7 +49,8 @@ class Manager(object):
 		signal.signal(signal.SIGTERM, self.receiveSignal)
 
 		# Socket IO based Live updates
-		if not self.connected_behaviour.behavior.offlineMode:
+
+		if not self.connected_behaviour.behavior.offlineMode and self.connector_type!='rabbitMq':
 			self.socketClient=VedaSocketIO(subscriptions=self.subscriptionTopics())
 			self.registerUpdateHandler()
 	
