@@ -137,7 +137,7 @@ class RabbitMqConnector(object):
         logger.info("Behaviour is schedule for shutdown.")
         self.client.stop()
         
-    def send(self,output,source_data):
+    def send(self,output,source_data=None):
         output = formatOutput(output, self.behavior,source_data)
         self.client.send(producerTopic=self.producerTopic,message=output)
         
@@ -201,7 +201,7 @@ class RabbitMqConnector(object):
                                 self.send(output)
                             
             except Exception as e:
-                logger.error("Exception in Behaviour code:{}",e)
+                logger.error("Exception in Behaviour code:{}".format(str(e)))
                 self.client.stop()
                 print("-"*60)
                 traceback.print_exc(file=sys.stdout)
