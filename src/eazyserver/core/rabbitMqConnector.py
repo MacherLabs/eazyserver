@@ -59,15 +59,16 @@ def formatOutput(output,behavior,source_data=None):
             output["_created"] = output["_updated"]
         else:
             # Propagate _created from input data which is source (_id of input specified as source_id of output)
-            for data in source_data:
-                if output["source_id"] == data["_id"]:
-                    output["_created"] = data["_created"]
-                    break
-            # Propagate _created time based upon same source_id of input data
-            for data in source_data:
-                if output["source_id"] == data["source_id"]:
-                    output["_created"] = data["_created"]
-                    break
+            if source_data:
+                for data in source_data:
+                    if output["source_id"] == data["_id"]:
+                        output["_created"] = data["_created"]
+                        break
+                # Propagate _created time based upon same source_id of input data
+                for data in source_data:
+                    if output["source_id"] == data["source_id"]:
+                        output["_created"] = data["_created"]
+                        break
                     
     if "_created" not in output: 		
         logger.info("{} | source_id  {} not found for id {}".format(output["_producer"],output["source_id"],output["_id"]))
@@ -136,8 +137,8 @@ class RabbitMqConnector(object):
         logger.info("Behaviour is schedule for shutdown.")
         self.client.stop()
         
-    def send(self,output):
-        output = formatOutput(output, self.behavior)
+    def send(self,output,source_data):
+        output = formatOutput(output, self.behavior,source_data)
         self.client.send(producerTopic=self.producerTopic,message=output)
         
 
@@ -162,7 +163,7 @@ class RabbitMqConnector(object):
             output=self.behaviour.run(message)
                 
             if output:
-                self.send(output)
+                self.send(output,[message])
         except Exception as e:
             logger.error("Exception in Behaviour code:{}",e)
             self.client.stop()
@@ -190,7 +191,7 @@ class RabbitMqConnector(object):
                             if message:
                                 output=self.behavior.run(message)
                                 if output:
-                                    self.send(output)
+                                    self.send(output,[message])
                                 
                     else:
                         message=self.client.consume_sync_all()
