@@ -160,12 +160,12 @@ class RabbitMqConnector(object):
     def consume(self,message,props=None,methods=None):
         try:
             consumerTopic=methods.routing_key
-            output=self.behaviour.run(message)
+            output=self.behavior.run(message)
                 
             if output:
                 self.send(output,[message])
         except Exception as e:
-            logger.error("Exception in Behaviour code:{}",e)
+            logger.error("Exception in Behaviour code:{}".format(str(e)))
             self.client.stop()
             print("-"*60)
             traceback.print_exc(file=sys.stdout)
