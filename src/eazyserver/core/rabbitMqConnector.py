@@ -121,7 +121,7 @@ class RabbitMqConnector(object):
         queueId=self.behavior.config.get("_id","")
         
         self.client=Connector.RabbitMqConnector(rabbit_server_config=RABBIT_SERVER_CONFIG,
-                                                consumerCallback=self.consume,
+                                                topicCallback=self.consume,
                                                 subscriptionCallback=self.update,
                                                 consumerTopics=self.consumerTopics,
                                                 consumerSyncTopics=self.consumerSyncTopics,
