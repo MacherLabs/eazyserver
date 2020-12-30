@@ -119,6 +119,7 @@ class RabbitMqConnector(object):
 
         # Create client based on type of Kafka Client specified
         queueId=self.behavior.config.get("_id","")
+        self.asyncLock=False
         
         self.client=Connector.RabbitMqConnector(rabbit_server_config=RABBIT_SERVER_CONFIG,
                                                 topicCallback=self.consume,
@@ -158,20 +159,26 @@ class RabbitMqConnector(object):
            
                 
     def consume(self,message,props=None,methods=None):
+        print ("consume called for msg")
         try:
+            while(self.asyncLock==True):
+                time.sleep(0.5)
+                print("waiting for async lock")
+            self.asyncLock=True
             consumerTopic=methods.routing_key
-            output=self.behavior.run(message)
-                
+            output=self.behavior.run(message)   
             if output:
                 self.send(output,[message])
+            self.asyncLock=False
         except Exception as e:
+            self.asyncLock=False
             logger.error("Exception in Behaviour code:{}".format(str(e)))
             self.client.stop()
             print("-"*60)
             traceback.print_exc(file=sys.stdout)
             self.on_exit(101)
             print("-"*60)
-            exit(101)
+            exit(101) 
             
             
         
@@ -198,7 +205,7 @@ class RabbitMqConnector(object):
                         if message:
                             output=self.behavior.run(message)
                             if output:
-                                self.send(output)
+                                self.send(output,[message])
                             
             except Exception as e:
                 logger.error("Exception in Behaviour code:{}".format(str(e)))
