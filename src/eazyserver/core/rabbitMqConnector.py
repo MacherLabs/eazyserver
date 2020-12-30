@@ -162,7 +162,7 @@ class RabbitMqConnector(object):
         print ("consume called for msg")
         try:
             while(self.asyncLock==True):
-                time.sleep(0.5)
+                time.sleep(0.1)
                 print("waiting for async lock")
             self.asyncLock=True
             consumerTopic=methods.routing_key
