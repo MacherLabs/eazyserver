@@ -31,4 +31,4 @@ diskcache==4.1.0
 
 #https://github.com/pyeve/eve/issues/1359
 werkzeug==0.16.1
-rabbitMqConnector@ git+https://github.com/MacherLabs/rabbitMqConnector.git
+rabbitMqConnector@ git+https://github.com/MacherLabs/rabbitMqConnector.git@thread_safe
