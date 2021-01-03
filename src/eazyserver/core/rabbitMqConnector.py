@@ -132,7 +132,9 @@ class RabbitMqConnector(object):
                                                 receiver_exchange="BEHAVIOUR_EVENTS",
                                                 queueId=queueId)
         
-
+        # Add rabbit mq client to the behaviour object as well
+        self.behavior.connector_client=self.client
+        
     def stop(self):
         self.should_stop=True
         logger.info("Behaviour is schedule for shutdown.")
@@ -189,7 +191,7 @@ class RabbitMqConnector(object):
                 if (self.consumerTopics ==None and self.consumerSyncTopics ==None):
                         output=self.behavior.run()
                         if output:
-                            self.send(output)
+                            self.send(output)    
                             
                 if self.consumerSyncTopics:
                     if self.consumerSyncMode !=True:
