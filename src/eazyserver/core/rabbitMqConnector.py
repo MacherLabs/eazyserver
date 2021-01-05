@@ -110,6 +110,8 @@ class RabbitMqConnector(object):
         self.producerSubscriptions=self.client_config.get("producerSubscriptions",None)
         self.consumerSyncTopics=self.client_config.get("consumerSyncTopics",None)
         self.consumerSyncMode=self.client_config.get("consumerSyncMode",False)
+        self.sender_rabbit_server_config=self.client_config.get("sender_rabbit_server_config",None)
+        self.receiver_rabbit_server_config=self.client_config.get("receiver_rabbit_server_config",None)
         
         print("="*50)
         print("Printing kwargs...")
@@ -121,7 +123,7 @@ class RabbitMqConnector(object):
         queueId=self.behavior.config.get("_id","")
         self.asyncLock=False
         
-        self.client=Connector.RabbitMqConnector(rabbit_server_config=RABBIT_SERVER_CONFIG,
+        self.client=Connector.RabbitMqConnector(rabbit_server_config=RABBIT_SERVER_CONFIG,        
                                                 topicCallback=self.consume,
                                                 subscriptionCallback=self.update,
                                                 consumerTopics=self.consumerTopics,
@@ -130,6 +132,8 @@ class RabbitMqConnector(object):
                                                 rest_api_config=REST_API_CONFIG,
                                                 sender_exchange="BEHAVIOUR_EVENTS",
                                                 receiver_exchange="BEHAVIOUR_EVENTS",
+                                                sender_rabbit_server_config=self.sender_rabbit_server_config,
+                                                receiver_rabbit_server_config=self.receiver_rabbit_server_config,
                                                 queueId=queueId)
         
         # Add rabbit mq client to the behaviour object as well
