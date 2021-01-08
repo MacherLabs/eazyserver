@@ -127,6 +127,7 @@ class RabbitMqConnector(object):
                                                 topicCallback=self.consume,
                                                 subscriptionCallback=self.update,
                                                 consumerTopics=self.consumerTopics,
+                                                consumerSubscriptions=self.consumerSubscriptions,
                                                 consumerSyncTopics=self.consumerSyncTopics,
                                                 producerTopic=self.producerTopic,
                                                 rest_api_config=REST_API_CONFIG,
