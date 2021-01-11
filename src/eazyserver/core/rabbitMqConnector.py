@@ -158,9 +158,20 @@ class RabbitMqConnector(object):
 
     # update event callback
     def update(self, data,props=None,methods=None):
-        logger.debug("KafkaConnector: Update triggered with data:{}".format(data))
-        UpdateSuccess = self.behavior.update(data)
-        logger.debug("KafkaConnector: Hot update status:{}".format(UpdateSuccess))
+        logger.debug("RabbitMqConnector: Update triggered with data:{}".format(data))
+        try:
+            while(self.asyncLock==True):
+                time.sleep(0.1)
+                print("waiting for async lock")
+            self.asyncLock=True  
+            UpdateSuccess = self.behavior.update(data)
+            self.asyncLock=False 
+        except Exception as e:
+            self.asyncLock=False 
+            logger.error("Exception in Behaviour code:{}".format(str(e)))
+            logger.info(traceback.format_exc()) 
+        logger.debug("RabbitMqConnector: Hot update status:{}".format(UpdateSuccess))
+        
         
         return UpdateSuccess
            
