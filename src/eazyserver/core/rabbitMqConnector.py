@@ -168,6 +168,7 @@ class RabbitMqConnector(object):
             self.asyncLock=False 
         except Exception as e:
             self.asyncLock=False 
+            UpdateSuccess=False
             logger.error("Exception in Behaviour code:{}".format(str(e)))
             logger.info(traceback.format_exc()) 
         logger.debug("RabbitMqConnector: Hot update status:{}".format(UpdateSuccess))
