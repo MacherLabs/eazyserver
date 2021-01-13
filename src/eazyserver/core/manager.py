@@ -39,7 +39,7 @@ class Manager(object):
 			self.connected_behaviour = RabbitMqConnector(
 				self.behaviour, 
 				on_exit=self.stop,
-				**self.self.rabbit_client_config)
+				**self.rabbit_client_config)
 			
 		self.signal_map = kwargs.get('signal_map', {})
 
