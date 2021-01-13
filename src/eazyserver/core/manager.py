@@ -21,7 +21,7 @@ class Manager(object):
 		self.connector_type = kwargs.get('connector_type','kafka')
 		self.kafka_client_type = kwargs.get('kafka_client_type',None)
 		self.kafka_client_config = kwargs.get('kafka_client_config',None)
-		self.client_config=kwargs.get('client_config',None)
+		self.rabbit_client_config=kwargs.get('rabbit_client_config',None)
 
 		
 		self.pid = os.getpid()
@@ -39,7 +39,7 @@ class Manager(object):
 			self.connected_behaviour = RabbitMqConnector(
 				self.behaviour, 
 				on_exit=self.stop,
-				**self.client_config)
+				**self.self.rabbit_client_config)
 			
 		self.signal_map = kwargs.get('signal_map', {})
 
